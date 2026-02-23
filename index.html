@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head><link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#ffffff">
+<meta charset="UTF-8">
+<title>Kalkulator Sekarofficial</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body{
+  font-family:Arial;
+  background:#f2f2f2;
+  padding:14px;
+}
+
+.card{
+  background:#fff;
+  padding:16px;
+  border-radius:12px;
+  margin-bottom:12px;
+}
+
+input{
+  width:100%;
+  padding:10px;
+  margin:6px 0 14px 0;
+  font-size:16px;
+}
+
+.result{
+  background:#fafafa;
+  padding:14px;
+  border-radius:10px;
+  line-height:1.9;
+}
+
+.big{
+  font-size:18px;
+  font-weight:bold;
+}
+
+.green{color:green}
+.red{color:#c0392b}
+</style>
+</head>
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js");
+}
+</script>
+<body>
+
+<div class="card">
+<h3>Kalkulator Sekarofficial</h3>
+
+<b>Harga Jual (Rp)</b>
+<input id="harga" type="number" value="32000">
+
+<b>Modal (Rp)</b>
+<input id="modal" type="number" value="20000">
+
+<b>Admin %</b>
+<input id="admin" type="number" value="9">
+
+<b>Ongkir %</b>
+<input id="ongkir" type="number" value="4">
+
+<b>Affiliate %</b>
+<input id="aff" type="number" value="0">
+
+<label>
+<input id="promoCheck" type="checkbox"> Promo Extra 4.5%
+</label>
+
+<b>Proses Pesanan (flat)</b>
+<input id="proses" type="number" value="1250">
+
+<label>
+<input id="hematCheck" type="checkbox" checked> Hemat Kirim 350
+</label>
+
+<b>Total Biaya Iklan (Rp)</b>
+<input id="budgetIklan" type="number" value="125000">
+
+<b>Target ROAS</b>
+<input id="roasInput" type="number" value="6">
+
+</div>
+
+
+<div class="card result">
+
+<div class="big">Rincian Potongan</div>
+
+Admin: Rp <span id="rAdmin">0</span><br>
+Ongkir: Rp <span id="rOngkir">0</span><br>
+Affiliate: Rp <span id="rAff">0</span><br>
+Promo: Rp <span id="rPromo">0</span><br>
+Proses: Rp <span id="rProses">0</span><br>
+Hemat: Rp <span id="rHemat">0</span><br>
+
+<hr>
+
+Total Potongan:
+<span class="red">Rp <span id="total">0</span></span><br>
+
+Uang Diterima:
+<span class="green">Rp <span id="diterima">0</span></span><br>
+
+Untung / Order (Sebelum Iklan):
+<span class="green">Rp <span id="untung">0</span></span><br>
+
+<hr>
+
+Biaya Iklan Maksimal (CPA):
+<span class="red">Rp <span id="biayaIklan">0</span></span><br>
+
+Untung Setelah Iklan:
+<span class="green">Rp <span id="untungIklan">0</span></span>
+
+<hr>
+
+<div class="big">Simulasi Campaign</div>
+
+Estimasi Omzet:
+<span class="green">Rp <span id="omzet">0</span></span><br>
+
+Estimasi Order:
+<span class="big"><span id="order">0</span> pcs</span><br>
+
+Total Profit Kotor:
+<span class="green">Rp <span id="profitKotor">0</span></span><br>
+
+Profit Setelah Iklan:
+<span class="green">Rp <span id="profitBersihCampaign">0</span></span>
+
+</div>
+
+
+<script>
+const $=id=>document.getElementById(id);
+
+function rp(n){return Math.round(n).toLocaleString("id-ID")}
+
+function hitung(){
+
+let harga=+$("harga").value;
+let modal=+$("modal").value;
+
+let admin=harga*$("admin").value/100;
+let ongkir=harga*$("ongkir").value/100;
+let aff=harga*$("aff").value/100;
+let promo=$("promoCheck").checked?harga*4.5/100:0;
+
+let proses=+$("proses").value;
+let hemat=$("hematCheck").checked?350:0;
+
+let targetRoas=+$("roasInput").value;
+let budget=+$("budgetIklan").value;
+
+let total=admin+ongkir+aff+promo+proses+hemat;
+
+let diterima=harga-total;
+let untung=diterima-modal;
+
+/* CPA dari ROAS */
+let biayaIklan = targetRoas>0 ? harga/targetRoas : 0;
+
+/* Untung setelah iklan per order */
+let untungIklan = untung - biayaIklan;
+
+/* ===== SIMULASI CAMPAIGN ===== */
+
+let omzet = budget * targetRoas;
+let order = harga>0 ? omzet / harga : 0;
+
+let profitKotor = order * untung;
+let profitBersihCampaign = profitKotor - budget;
+
+/* OUTPUT */
+$("rAdmin").innerText=rp(admin);
+$("rOngkir").innerText=rp(ongkir);
+$("rAff").innerText=rp(aff);
+$("rPromo").innerText=rp(promo);
+$("rProses").innerText=rp(proses);
+$("rHemat").innerText=rp(hemat);
+
+$("total").innerText=rp(total);
+$("diterima").innerText=rp(diterima);
+$("untung").innerText=rp(untung);
+
+$("biayaIklan").innerText=rp(biayaIklan);
+$("untungIklan").innerText=rp(untungIklan);
+
+$("omzet").innerText=rp(omzet);
+$("order").innerText=Math.floor(order);
+$("profitKotor").innerText=rp(profitKotor);
+$("profitBersihCampaign").innerText=rp(profitBersihCampaign);
+}
+
+document.querySelectorAll("input").forEach(i=>i.oninput=hitung);
+hitung();
+</script>
+
+</body>
+</html>
